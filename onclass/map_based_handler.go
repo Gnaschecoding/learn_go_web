@@ -9,7 +9,8 @@ type Routable interface {
 }
 
 type Handler interface {
-	http.Handler
+	//http.Handler
+	ServeHTTP(c *Context)
 	Routable
 }
 
@@ -28,13 +29,13 @@ func (h *HandlerBaseOnMap) Route(mathod string, pattern string, handleFunc func(
 
 }
 
-func (h *HandlerBaseOnMap) ServeHTTP(writer http.ResponseWriter, requset *http.Request) {
-	key := h.Key(requset.Method, requset.URL.Path)
+func (h *HandlerBaseOnMap) ServeHTTP(c *Context) {
+	key := h.Key(c.R.Method, c.R.URL.Path)
 	if handler, ok := h.handlers[key]; ok {
-		handler(NewContext(writer, requset))
+		handler(c)
 	} else {
-		writer.WriteHeader(http.StatusNotFound)
-		writer.Write([]byte("Not Found"))
+		c.W.WriteHeader(http.StatusNotFound)
+		c.W.Write([]byte("Not Found"))
 	}
 
 }
